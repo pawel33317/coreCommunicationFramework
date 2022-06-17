@@ -13,10 +13,10 @@ type AppStateObserver interface {
 
 //AppStateManager implements this interface
 type AppStateClient interface {
-	RegisterObserver(AppStateObserver)                      //registers to get inormation about system state changes
-	RegisterLockState(*AppStateObserver, app_state.State)   //state cannot be changed without confirmation "unlockState()" from AppStateObserver
-	UnregisterLockState(*AppStateObserver, app_state.State) //state can be changed without confirmation from AppStateObserver
-	UnlockState(*AppStateObserver, app_state.State)         //confirm that state can be changed
+	RegisterObserver(AppStateObserver)                     //registers to get inormation about system state changes
+	RegisterLockState(AppStateObserver, app_state.State)   //state cannot be changed without confirmation "unlockState()" from AppStateObserver
+	UnregisterLockState(AppStateObserver, app_state.State) //state can be changed without confirmation from AppStateObserver
+	UnlockState(AppStateObserver, app_state.State)         //confirm that state can be changed
 }
 
 //AppStateManager implements this interface
@@ -28,7 +28,7 @@ type AppStateManager interface {
 
 type observerListUnique map[AppStateObserver]bool //set of AppStateObservers
 
-type AppStateManagerData struct {
+type AppStateManagerCtx struct {
 	stateObserver                observerListUnique                     //set of AppStateObservers
 	lockedState                  map[app_state.State]observerListUnique //set of states which contains set of AppStateObserver which are blocking particular state
 	observerBlockingCurrentState observerListUnique                     //set of AppStateObservers which are blocking change of current state
@@ -36,8 +36,8 @@ type AppStateManagerData struct {
 	//TODO: logger
 }
 
-func MakeAppStateManagerData() *AppStateManagerData {
-	return &AppStateManagerData{
+func MakeAppStateManagerCtx() *AppStateManagerCtx {
+	return &AppStateManagerCtx{
 		stateObserver:                make(observerListUnique),
 		lockedState:                  make(map[app_state.State]observerListUnique),
 		observerBlockingCurrentState: make(observerListUnique),
@@ -45,18 +45,18 @@ func MakeAppStateManagerData() *AppStateManagerData {
 	}
 }
 
-func (asmData *AppStateManagerData) informObservers() {
+func (asmData *AppStateManagerCtx) informObservers() {
 	fmt.Println("Informing observers")
 	for o := range asmData.stateObserver {
 		o.OnAppStateChanged(asmData.currentState)
 	}
 }
 
-func (asmData *AppStateManagerData) isCurrencStateBlocked() bool {
+func (asmData *AppStateManagerCtx) isCurrencStateBlocked() bool {
 	return len(asmData.observerBlockingCurrentState) != 0
 }
 
-func (asmData *AppStateManagerData) processStates() {
+func (asmData *AppStateManagerCtx) processStates() {
 	if asmData.isCurrencStateBlocked() {
 		fmt.Println("Current State is blocked be some observer")
 		return
@@ -75,28 +75,53 @@ func (asmData *AppStateManagerData) processStates() {
 	asmData.processStates()
 }
 
-func (asmData *AppStateManagerData) changeState(newState app_state.State) {
+func (asmData *AppStateManagerCtx) changeState(newState app_state.State) {
 	fmt.Println("Changing state from:", asmData.currentState.ToString(), "to:", newState.ToString())
 	asmData.currentState = newState
 	if _, ok := asmData.lockedState[newState]; ok {
-		asmData.observerBlockingCurrentState = asmData.lockedState[newState]
+		asmData.observerBlockingCurrentState = make(observerListUnique)
+		for k, v := range asmData.lockedState[newState] {
+			asmData.observerBlockingCurrentState[k] = v
+		}
 	}
 }
 
-func (asmData *AppStateManagerData) Start(startState app_state.State) {
+func (asmData *AppStateManagerCtx) Start(startState app_state.State) {
 	asmData.currentState = startState
 
 	fmt.Println("ASM started")
 
 	if _, ok := asmData.lockedState[startState]; ok {
-		asmData.observerBlockingCurrentState = asmData.lockedState[startState]
+		asmData.observerBlockingCurrentState = make(observerListUnique)
+		for k, v := range asmData.lockedState[startState] {
+			asmData.observerBlockingCurrentState[k] = v
+		}
 	}
 	asmData.informObservers()
 	asmData.processStates()
 }
 
-func (asmData *AppStateManagerData) RegisterObserver(observer AppStateObserver) {
+func (asmData *AppStateManagerCtx) RegisterObserver(observer AppStateObserver) {
 	asmData.stateObserver[observer] = true
+}
+
+func (asmData *AppStateManagerCtx) RegisterLockState(observer AppStateObserver, state app_state.State) {
+	fmt.Println("Added lock state", state.ToString(), "by application", observer)
+	if asmData.lockedState[state] == nil {
+		asmData.lockedState[state] = make(observerListUnique)
+	}
+	asmData.lockedState[state][observer] = true
+}
+
+func (asmData *AppStateManagerCtx) UnregisterLockState(observer AppStateObserver, state app_state.State) {
+	fmt.Println("Removed lock state", state.ToString(), "by application", observer)
+	delete(asmData.lockedState[state], observer)
+}
+
+func (asmData *AppStateManagerCtx) UnlockState(observer AppStateObserver, state app_state.State) {
+	fmt.Println("Unlocking state", state.ToString(), "by application", observer)
+	delete(asmData.observerBlockingCurrentState, observer)
+	asmData.processStates()
 }
 
 /*
