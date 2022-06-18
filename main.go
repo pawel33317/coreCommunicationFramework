@@ -9,7 +9,7 @@ import (
 type AppStateClient struct {
 	asm    app_state_manager.AppStateClientHandler
 	Name   string
-	logger logger.Logger
+	logger *logger.LogWrapper
 }
 
 func (client *AppStateClient) OnAppStateChanged(startState app_state.State) {
@@ -33,11 +33,12 @@ func main() {
 	log := logger.NewLoggerImp()
 	log.Enable()
 	log.SetMinLogLevel(logger.INFO)
-	asManager := app_state_manager.MakeAppStateManagerImp(log)
-	asClient := &AppStateClient{asManager, "A", log}
+	asManager := app_state_manager.NewAppStateManagerImp(log)
+
+	asClient := &AppStateClient{asManager, "A", logger.NewLogWrapper(log, "ASC1")}
 	asClient.Start(app_state.LOADING)
 
-	asClient2 := &AppStateClient{asManager, "B", log}
+	asClient2 := &AppStateClient{asManager, "B", logger.NewLogWrapper(log, "ASC2")}
 	asClient2.Start(app_state.CONFIGURED)
 
 	asManager.Start(app_state.INITIALIZING)

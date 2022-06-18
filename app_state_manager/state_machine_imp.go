@@ -7,6 +7,17 @@ import (
 	"github.com/pawel33317/coreCommunicationFramework/logger"
 )
 
+/*
+ * AppStateManagerImp struct - implementation of AppStateManager interface
+ *   - MakeAppStateManagerImp(logger)
+ *   - Start()
+ *   - GetCurrentState()
+ *   - RegisterObserver(obs)
+ *   - RegisterLockState(obs, state)
+ *   - UnregisterLockState(obs, state)
+ *   - UnlockState(state)
+ */
+
 //private
 type observerListUnique map[AppStateObserver]bool //set of AppStateObservers
 
@@ -18,17 +29,17 @@ type AppStateManagerImp struct {
 	lockedState                  map[app_state.State]observerListUnique //set of states which contains set of AppStateObserver which are blocking particular state
 	observerBlockingCurrentState observerListUnique                     //set of AppStateObservers which are blocking change of current state
 	currentState                 app_state.State                        //current state
-	logger                       logger.Logger
+	logger                       *logger.LogWrapper
 }
 
 //MakeAppStateManagerImp constructor
-func MakeAppStateManagerImp(smLogger logger.Logger) *AppStateManagerImp {
+func NewAppStateManagerImp(smLogger logger.Logger) *AppStateManagerImp {
 	return &AppStateManagerImp{
 		stateObserver:                make(observerListUnique),
 		lockedState:                  make(map[app_state.State]observerListUnique),
 		observerBlockingCurrentState: make(observerListUnique),
 		currentState:                 app_state.DISABLED,
-		logger:                       smLogger,
+		logger:                       logger.NewLogWrapper(smLogger, "SMM"),
 	}
 }
 
@@ -83,6 +94,7 @@ func (asmData *AppStateManagerImp) setObserversBlockingCurrentState(newState app
 }
 
 //from AppStateManager interface
+//start SM try to achieve OPPERABLE state
 func (asmData *AppStateManagerImp) Start(startState app_state.State) {
 	asmData.changeState(startState)
 	asmData.informObservers()
@@ -90,16 +102,19 @@ func (asmData *AppStateManagerImp) Start(startState app_state.State) {
 }
 
 //from AppStateManager interface
+//return SM current state
 func (asmData *AppStateManagerImp) GetCurrentState() app_state.State {
 	return asmData.currentState
 }
 
 //from AppStateClientHandler interface
+//registered observer receives information about state changes
 func (asmData *AppStateManagerImp) RegisterObserver(observer AppStateObserver) {
 	asmData.stateObserver[observer] = true
 }
 
 //from AppStateClientHandler interface
+//start blocking state by observer, when SM achieve waits for observer confirmation before go further
 func (asmData *AppStateManagerImp) RegisterLockState(observer AppStateObserver, state app_state.State) {
 	asmData.logger.Log(logger.INFO, "SM", "Added lock state ", state.ToString(), " by application ", observer)
 	if asmData.lockedState[state] == nil {
@@ -109,6 +124,7 @@ func (asmData *AppStateManagerImp) RegisterLockState(observer AppStateObserver, 
 }
 
 //from AppStateClientHandler interface
+//stop blocking state, SM will not wait for confirmation from observer
 func (asmData *AppStateManagerImp) UnregisterLockState(observer AppStateObserver, state app_state.State) {
 	asmData.logger.Log(logger.INFO, "SM", "Removed lock state ", state.ToString(), " by application ", observer)
 	fmt.Println()
@@ -116,6 +132,7 @@ func (asmData *AppStateManagerImp) UnregisterLockState(observer AppStateObserver
 }
 
 //from AppStateClientHandler interface
+//unlock blocked state - allows SM to go further
 func (asmData *AppStateManagerImp) UnlockState(observer AppStateObserver) {
 	asmData.logger.Log(logger.INFO, "SM", "Unlocking state ", asmData.currentState.ToString(), " by application ", observer)
 	delete(asmData.observerBlockingCurrentState, observer)

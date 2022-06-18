@@ -2,8 +2,18 @@ package app_state
 
 import "fmt"
 
+/*
+ * State states
+ *   - 11 SM states
+ *   - ToString()
+ *   - IsTargetState()
+ *   - GetNextState()
+ */
+
+//SM state
 type State int
 
+//List of SM states
 const (
 	INITIALIZING State = iota
 	INITIALIZED
@@ -18,6 +28,7 @@ const (
 	ENABLED
 )
 
+//Converts SM state to string
 func (state State) ToString() string {
 	switch state {
 	case INITIALIZING:
@@ -47,6 +58,7 @@ func (state State) ToString() string {
 	}
 }
 
+//Returns information whether current state is currently final
 func (state State) IsTargetState() bool {
 	switch state {
 	case OPERRABLE, TURNEDOFF, DISABLED, ENABLED:
@@ -56,6 +68,7 @@ func (state State) IsTargetState() bool {
 	}
 }
 
+//Returns next state if current state is not target or error
 func (state State) GetNextState() (State, error) {
 	switch state {
 	case INITIALIZING:

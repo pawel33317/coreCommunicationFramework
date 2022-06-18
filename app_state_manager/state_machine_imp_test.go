@@ -1,20 +1,21 @@
 package app_state_manager
 
 import (
-	"fmt"
 	"testing"
 
 	"github.com/pawel33317/coreCommunicationFramework/app_state_manager/app_state"
+	"github.com/pawel33317/coreCommunicationFramework/logger"
 )
 
 //State machine client implementation
 type AppStateTestClient struct {
-	asm  AppStateClientHandler
-	Name string
+	asm    AppStateClientHandler
+	Name   string
+	logger *logger.LogWrapper
 }
 
-func (moduleData *AppStateTestClient) OnAppStateChanged(startState app_state.State) {
-	fmt.Println("Module informed about new state", startState.ToString())
+func (client *AppStateTestClient) OnAppStateChanged(startState app_state.State) {
+	client.logger.Log(logger.INFO, "Module informed about new state", startState.ToString())
 }
 func (client *AppStateTestClient) RegisterClient() {
 	client.asm.RegisterObserver(client)
@@ -27,14 +28,18 @@ func (client *AppStateTestClient) UnlockState() {
 }
 
 func TestMakeAppStateManagerImpInitialState(t *testing.T) {
-	asManager := MakeAppStateManagerImp()
+	log := logger.NewLoggerImp()
+	log.Disable()
+	asManager := NewAppStateManagerImp(log)
 	if asManager.GetCurrentState() != app_state.DISABLED {
 		t.Error("Incorrect initial state")
 	}
 }
 
 func TestMakeAppStateManagerImpTargetState(t *testing.T) {
-	asManager := MakeAppStateManagerImp()
+	log := logger.NewLoggerImp()
+	log.Disable()
+	asManager := NewAppStateManagerImp(log)
 	asManager.Start(app_state.INITIALIZING)
 	if asManager.GetCurrentState() != app_state.OPERRABLE {
 		t.Error("Incorrect target state")
@@ -42,8 +47,10 @@ func TestMakeAppStateManagerImpTargetState(t *testing.T) {
 }
 
 func TestMakeAppStateManagerImpRegisterClientAndBlockState(t *testing.T) {
-	asManager := MakeAppStateManagerImp()
-	smClient := &AppStateTestClient{asManager, "ClientA"}
+	log := logger.NewLoggerImp()
+	log.Disable()
+	asManager := NewAppStateManagerImp(log)
+	smClient := &AppStateTestClient{asManager, "ClientA", logger.NewLogWrapper(log, "TC")}
 	smClient.RegisterClient()
 	smClient.LockState(app_state.LOADING)
 
@@ -63,9 +70,11 @@ func TestMakeAppStateManagerImpRegisterClientAndBlockState(t *testing.T) {
 }
 
 func TestMakeAppStateManagerImpTwoClientsBlockStates(t *testing.T) {
-	asManager := MakeAppStateManagerImp()
-	smClientA := &AppStateTestClient{asManager, "ClientA"}
-	smClientB := &AppStateTestClient{asManager, "ClientB"}
+	log := logger.NewLoggerImp()
+	log.Disable()
+	asManager := NewAppStateManagerImp(log)
+	smClientA := &AppStateTestClient{asManager, "ClientA", logger.NewLogWrapper(log, "TC1")}
+	smClientB := &AppStateTestClient{asManager, "ClientB", logger.NewLogWrapper(log, "TC2")}
 
 	smClientA.RegisterClient()
 	smClientB.RegisterClient()
