@@ -13,17 +13,17 @@ type AppStateClient struct {
 }
 
 func (client *AppStateClient) OnAppStateChanged(startState app_state.State) {
-	client.logger.Log(logger.DEBUG, "MAIN", "Module informed about new state", startState.ToString())
+	client.logger.Log(logger.DEBUG, "Module informed about new state", startState.ToString())
 }
 
 func (client *AppStateClient) Start(state app_state.State) {
-	client.logger.Log(logger.INFO, "MAIN", "Client register as obserber and LOCK state", state.ToString())
+	client.logger.Log(logger.INFO, "Client register as obserber and LOCK state", state.ToString())
 	client.asm.RegisterObserver(client)
 	client.asm.RegisterLockState(client, state)
 }
 
 func (client *AppStateClient) End(state app_state.State) {
-	client.logger.Log(logger.INFO, "MAIN", "Client unlock state", state.ToString())
+	client.logger.Log(logger.INFO, "Client unlock state", state.ToString())
 	client.asm.UnlockState(client)
 }
 
@@ -32,7 +32,7 @@ func main() {
 
 	log := logger.NewLoggerImp()
 	log.Enable()
-	log.SetMinLogLevel(logger.INFO)
+	log.SetMinLogLevel(logger.DEBUG)
 	asManager := app_state_manager.NewAppStateManagerImp(log)
 
 	asClient := &AppStateClient{asManager, "A", logger.NewLogWrapper(log, "ASC1")}

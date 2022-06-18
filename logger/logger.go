@@ -62,7 +62,7 @@ type LogWrapper struct {
 
 //forwards data to logger and add context
 func (lw *LogWrapper) Log(ll LogLevel, data ...interface{}) {
-	lw.logger.Log(ll, lw.ctx, data)
+	lw.logger.Log(ll, lw.ctx, data...)
 }
 
 //LogWrapper constructor

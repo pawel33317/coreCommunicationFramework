@@ -45,7 +45,7 @@ func NewAppStateManagerImp(smLogger logger.Logger) *AppStateManagerImp {
 
 //private
 func (asmData *AppStateManagerImp) informObservers() {
-	asmData.logger.Log(logger.DEBUG, "SM", "Informing observers")
+	asmData.logger.Log(logger.DEBUG, "Informing observers")
 	for o := range asmData.stateObserver {
 		o.OnAppStateChanged(asmData.currentState)
 	}
@@ -59,16 +59,16 @@ func (asmData *AppStateManagerImp) isCurrencStateBlocked() bool {
 //private
 func (asmData *AppStateManagerImp) processStates() {
 	if asmData.isCurrencStateBlocked() {
-		asmData.logger.Log(logger.INFO, "SM", "Current State is blocked by some observer")
+		asmData.logger.Log(logger.INFO, "Current State is blocked by some observer")
 		return
 	}
 	if asmData.currentState.IsTargetState() {
-		asmData.logger.Log(logger.INFO, "SM", "Current State is target state, nothing to process", asmData.currentState.ToString())
+		asmData.logger.Log(logger.INFO, "Current State is target state, nothing to process", asmData.currentState.ToString())
 		return
 	}
 	newState, err := asmData.currentState.GetNextState()
 	if err != nil {
-		asmData.logger.Log(logger.WARN, "SM", err.Error())
+		asmData.logger.Log(logger.WARN, err.Error())
 		return
 	}
 	asmData.changeState(newState)
@@ -78,7 +78,7 @@ func (asmData *AppStateManagerImp) processStates() {
 
 //private
 func (asmData *AppStateManagerImp) changeState(newState app_state.State) {
-	asmData.logger.Log(logger.DEBUG, "SM", "Changing state from:", asmData.currentState.ToString(), "to:", newState.ToString())
+	asmData.logger.Log(logger.DEBUG, "Changing state from:", asmData.currentState.ToString(), "to:", newState.ToString())
 	asmData.currentState = newState
 	asmData.setObserversBlockingCurrentState(newState)
 }
@@ -116,7 +116,7 @@ func (asmData *AppStateManagerImp) RegisterObserver(observer AppStateObserver) {
 //from AppStateClientHandler interface
 //start blocking state by observer, when SM achieve waits for observer confirmation before go further
 func (asmData *AppStateManagerImp) RegisterLockState(observer AppStateObserver, state app_state.State) {
-	asmData.logger.Log(logger.INFO, "SM", "Added lock state ", state.ToString(), " by application ", observer)
+	asmData.logger.Log(logger.INFO, "Added lock state ", state.ToString(), " by application ", observer)
 	if asmData.lockedState[state] == nil {
 		asmData.lockedState[state] = make(observerListUnique)
 	}
@@ -126,7 +126,7 @@ func (asmData *AppStateManagerImp) RegisterLockState(observer AppStateObserver, 
 //from AppStateClientHandler interface
 //stop blocking state, SM will not wait for confirmation from observer
 func (asmData *AppStateManagerImp) UnregisterLockState(observer AppStateObserver, state app_state.State) {
-	asmData.logger.Log(logger.INFO, "SM", "Removed lock state ", state.ToString(), " by application ", observer)
+	asmData.logger.Log(logger.INFO, "Removed lock state ", state.ToString(), " by application ", observer)
 	fmt.Println()
 	delete(asmData.lockedState[state], observer)
 }
@@ -134,7 +134,7 @@ func (asmData *AppStateManagerImp) UnregisterLockState(observer AppStateObserver
 //from AppStateClientHandler interface
 //unlock blocked state - allows SM to go further
 func (asmData *AppStateManagerImp) UnlockState(observer AppStateObserver) {
-	asmData.logger.Log(logger.INFO, "SM", "Unlocking state ", asmData.currentState.ToString(), " by application ", observer)
+	asmData.logger.Log(logger.INFO, "Unlocking state ", asmData.currentState.ToString(), " by application ", observer)
 	delete(asmData.observerBlockingCurrentState, observer)
 	asmData.processStates()
 }
