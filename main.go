@@ -3,6 +3,7 @@ package main
 import (
 	"github.com/pawel33317/coreCommunicationFramework/app_state_manager"
 	"github.com/pawel33317/coreCommunicationFramework/app_state_manager/app_state"
+	"github.com/pawel33317/coreCommunicationFramework/db_handler"
 	"github.com/pawel33317/coreCommunicationFramework/logger"
 )
 
@@ -28,11 +29,15 @@ func (client *AppStateClient) End(state app_state.State) {
 }
 
 func main() {
-	//dbHandler.RunHandler("test")
-
 	log := logger.NewLoggerImp()
 	log.Enable()
 	log.SetMinLogLevel(logger.DEBUG)
+
+	log.Log(logger.INFO, "MAIN", "App start")
+
+	db_handler.RunDb()
+	//dbHandler.RunHandler("test")
+
 	asManager := app_state_manager.NewAppStateManagerImp(log)
 
 	asClient := &AppStateClient{asManager, "A", logger.NewLogWrapper(log, "ASC1")}
@@ -45,5 +50,5 @@ func main() {
 
 	asClient.End(app_state.LOADING)
 	asClient2.End(app_state.CONFIGURED)
-
+	log.Log(logger.INFO, "MAIN", "App end")
 }

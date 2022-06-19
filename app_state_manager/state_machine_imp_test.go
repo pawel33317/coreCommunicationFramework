@@ -27,7 +27,7 @@ func (client *AppStateTestClient) UnlockState() {
 	client.asm.UnlockState(client)
 }
 
-func TestMakeAppStateManagerImpInitialState(t *testing.T) {
+func TestAppStateManagerImpInitialState(t *testing.T) {
 	log := logger.NewLoggerImp()
 	log.Disable()
 	asManager := NewAppStateManagerImp(log)
@@ -36,7 +36,7 @@ func TestMakeAppStateManagerImpInitialState(t *testing.T) {
 	}
 }
 
-func TestMakeAppStateManagerImpTargetState(t *testing.T) {
+func TestAppStateManagerImpTargetState(t *testing.T) {
 	log := logger.NewLoggerImp()
 	log.Disable()
 	asManager := NewAppStateManagerImp(log)
@@ -46,7 +46,7 @@ func TestMakeAppStateManagerImpTargetState(t *testing.T) {
 	}
 }
 
-func TestMakeAppStateManagerImpRegisterClientAndBlockState(t *testing.T) {
+func TestAppStateManagerImpRegisterClientAndBlockState(t *testing.T) {
 	log := logger.NewLoggerImp()
 	log.Disable()
 	asManager := NewAppStateManagerImp(log)
@@ -69,7 +69,7 @@ func TestMakeAppStateManagerImpRegisterClientAndBlockState(t *testing.T) {
 	}
 }
 
-func TestMakeAppStateManagerImpTwoClientsBlockStates(t *testing.T) {
+func TestAppStateManagerImpTwoClientsBlockStates(t *testing.T) {
 	log := logger.NewLoggerImp()
 	log.Disable()
 	asManager := NewAppStateManagerImp(log)
