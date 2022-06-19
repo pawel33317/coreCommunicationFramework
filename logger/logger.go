@@ -2,6 +2,8 @@ package logger
 
 import (
 	"fmt"
+
+	"github.com/pawel33317/coreCommunicationFramework/db_handler"
 )
 
 /*
@@ -82,13 +84,15 @@ type Logger interface {
 type LoggerImp struct {
 	isEnabled   bool
 	minLogLevel LogLevel
+	dbHandler   db_handler.DbLogger
 }
 
 //LoggerImp constructor
-func NewLoggerImp() *LoggerImp {
+func NewLoggerImp(dbLogger db_handler.DbLogger) *LoggerImp {
 	return &LoggerImp{
 		isEnabled:   true,
 		minLogLevel: DEBUG,
+		dbHandler:   dbLogger,
 	}
 }
 

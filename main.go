@@ -1,6 +1,8 @@
 package main
 
 import (
+	"os"
+
 	"github.com/pawel33317/coreCommunicationFramework/app_state_manager"
 	"github.com/pawel33317/coreCommunicationFramework/app_state_manager/app_state"
 	"github.com/pawel33317/coreCommunicationFramework/db_handler"
@@ -29,13 +31,20 @@ func (client *AppStateClient) End(state app_state.State) {
 }
 
 func main() {
-	log := logger.NewLoggerImp()
+	db := db_handler.SQLiteDb{}
+	dbErr := db.Open()
+
+	if dbErr != nil {
+		os.Exit(2)
+	}
+	defer db.Close()
+
+	log := logger.NewLoggerImp(nil)
 	log.Enable()
 	log.SetMinLogLevel(logger.DEBUG)
 
 	log.Log(logger.INFO, "MAIN", "App start")
 
-	db_handler.RunDb()
 	//dbHandler.RunHandler("test")
 
 	asManager := app_state_manager.NewAppStateManagerImp(log)
