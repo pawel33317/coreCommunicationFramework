@@ -39,7 +39,7 @@ func main() {
 	}
 	defer db.Close()
 
-	log := logger.NewLoggerImp(nil)
+	log := logger.NewLoggerImp(&db)
 	log.Enable()
 	log.SetMinLogLevel(logger.DEBUG)
 

@@ -4,7 +4,6 @@ import (
 	"database/sql"
 
 	_ "github.com/mattn/go-sqlite3"
-	"github.com/pawel33317/coreCommunicationFramework/logger"
 )
 
 const (
@@ -21,7 +20,7 @@ const (
 
 //Allows to store logs in DB
 type DbLogger interface {
-	Log(int64, logger.LogLevel, string, string)
+	Log(int64, int, string, string)
 }
 
 //Allows to read logs from DB
@@ -32,6 +31,20 @@ type DbLogReader interface {
 //SQLite handler implementation
 type SQLiteDb struct {
 	dbHandler *sql.DB
+}
+
+func (sqlDb *SQLiteDb) Log(time int64, level int, ctx string, msg string) {
+	stmt, err := sqlDb.dbHandler.Prepare("INSERT INTO logs(time, level, ctx, log) values(?,?,?,?)")
+	if err != nil {
+		panic(err)
+	}
+
+	_, err = stmt.Exec(time, level, ctx, msg)
+	if err != nil {
+		panic(err)
+	}
+
+	//TODO: remove records if more than 100
 }
 
 //Starts connection to SQLite and create logs table if not exists
@@ -50,5 +63,5 @@ func (sqlDb *SQLiteDb) Open() error {
 }
 
 func (sqlDb *SQLiteDb) Close() {
-	sqlDb.Close()
+	sqlDb.dbHandler.Close()
 }

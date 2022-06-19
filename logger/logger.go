@@ -2,6 +2,8 @@ package logger
 
 import (
 	"fmt"
+	"strings"
+	"time"
 
 	"github.com/pawel33317/coreCommunicationFramework/db_handler"
 )
@@ -96,6 +98,16 @@ func NewLoggerImp(dbLogger db_handler.DbLogger) *LoggerImp {
 	}
 }
 
+func (loggerImp *LoggerImp) logToDB(level LogLevel, ctx string, i ...interface{}) {
+	var slice []string
+
+	for _, v := range i {
+		slice = append(slice, fmt.Sprint(v))
+	}
+
+	loggerImp.dbHandler.Log(time.Now().Unix(), int(level), ctx, strings.Join(slice, " "))
+}
+
 //Logger interface log method implementation
 func (loggerImp *LoggerImp) Log(level LogLevel, ctx string, i ...interface{}) {
 	if !loggerImp.isEnabled || loggerImp.minLogLevel > level {
@@ -112,6 +124,10 @@ func (loggerImp *LoggerImp) Log(level LogLevel, ctx string, i ...interface{}) {
 		fmt.Print(" ", v)
 	}
 	fmt.Println()
+
+	if loggerImp.dbHandler != nil {
+		loggerImp.logToDB(level, ctx, i...)
+	}
 }
 
 //Enables Logger
