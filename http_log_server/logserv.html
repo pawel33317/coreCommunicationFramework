@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+	table {
+		font-family: arial, sans-serif;
+		border-collapse: collapse;
+		width: 100%;
+	}
+	
+	td, th {
+		border: 1px solid #dddddd;
+		text-align: left;
+		padding: 8px;
+	}
+	
+	tr:nth-child(even) {
+		background-color: #dddddd;
+	}
+</style>
+<title>{{.PageTitle}}</title>
+</head>
+<body>
+
+	<h1>{{.PageTitle}}</h1>
+
+	<table>
+		<tr>
+			<th>ID</th>
+			<th>TIME</th>
+			<th>LEVEL</th>
+			<th>CTX</th>
+			<th>MSG</th>
+		</tr>
+
+		{{range .LogsData}}
+		<tr>
+			<td>{{.LogId}}</td>
+			<td>{{.LogTime}}</th>
+			<td>{{.LogLevel}}</th>
+			<td>{{.LogCtx}}</th>
+			<td>{{.LogMsg}}</th>
+		</tr>
+		{{end}}
+
+	</table>
+
+</body>
+</html>
+
+
+
+

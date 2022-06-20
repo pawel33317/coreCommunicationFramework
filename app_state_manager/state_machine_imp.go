@@ -101,6 +101,12 @@ func (asmData *AppStateManagerImp) Start(startState app_state.State) {
 	asmData.processStates()
 }
 
+func (asmData *AppStateManagerImp) RequestStateChange(startState app_state.State) {
+	asmData.changeState(startState)
+	asmData.informObservers()
+	asmData.processStates()
+}
+
 //from AppStateManager interface
 //return SM current state
 func (asmData *AppStateManagerImp) GetCurrentState() app_state.State {

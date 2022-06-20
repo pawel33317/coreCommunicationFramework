@@ -26,6 +26,6 @@ type AppStateClientHandler interface {
 
 //AppStateManagerImp implements this interface
 type AppStateManager interface {
-	Start(app_state.State)                          //start AppStateManager, tries to go from state INITIALIZING to OPERRABLE
-	RequestStateChange(app_state.State, bool) error //allows to move to acceptable state, bool force
+	Start(app_state.State)                    //start AppStateManager, tries to go from state INITIALIZING to OPERRABLE
+	RequestStateChange(app_state.State) error //allows to move to acceptable state, bool force
 }

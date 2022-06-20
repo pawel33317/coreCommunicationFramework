@@ -25,12 +25,40 @@ type DbLogger interface {
 
 //Allows to read logs from DB
 type DbLogReader interface {
-	GetLogs()
+	GetLogs() []LogDataFormat
+}
+
+type LogDataFormat struct {
+	LogId    string
+	LogTime  string
+	LogLevel string
+	LogCtx   string
+	LogMsg   string
 }
 
 //SQLite handler implementation
 type SQLiteDb struct {
 	dbHandler *sql.DB
+}
+
+func (sqlDb *SQLiteDb) GetLogs() []LogDataFormat {
+	rows, err := sqlDb.dbHandler.Query("SELECT * FROM logs ORDER BY id DESC LIMIT 500")
+	if err != nil {
+		panic(err)
+	}
+	defer rows.Close()
+
+	data := []LogDataFormat{}
+
+	for rows.Next() {
+		i := LogDataFormat{}
+		err = rows.Scan(&i.LogId, &i.LogTime, &i.LogLevel, &i.LogCtx, &i.LogMsg)
+		if err != nil {
+			panic(err)
+		}
+		data = append(data, i)
+	}
+	return data
 }
 
 func (sqlDb *SQLiteDb) Log(time int64, level int, ctx string, msg string) {
