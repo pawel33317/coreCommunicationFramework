@@ -1,4 +1,4 @@
-package sys_signal_receiver
+package sys_signal_listener
 
 import (
 	"os"
@@ -6,7 +6,7 @@ import (
 	"syscall"
 )
 
-func ReceiveTerminationSignal(receivedChannel chan<- bool) {
+func ListenOnTerminationSignal(receivedChannel chan<- bool) {
 	sigs := make(chan os.Signal, 1)
 	signal.Notify(sigs, syscall.SIGINT, syscall.SIGTERM)
 

@@ -1,6 +1,7 @@
 package app_state_manager
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/pawel33317/coreCommunicationFramework/app_state_manager/app_state"
@@ -28,7 +29,7 @@ func (client *AppStateTestClient) UnlockState() {
 }
 
 func TestAppStateManagerImpInitialState(t *testing.T) {
-	log := logger.NewLoggerImp()
+	log := logger.NewLoggerImp(nil)
 	log.Disable()
 	asManager := NewAppStateManagerImp(log)
 	if asManager.GetCurrentState() != app_state.DISABLED {
@@ -37,40 +38,41 @@ func TestAppStateManagerImpInitialState(t *testing.T) {
 }
 
 func TestAppStateManagerImpTargetState(t *testing.T) {
-	log := logger.NewLoggerImp()
+	log := logger.NewLoggerImp(nil)
 	log.Disable()
 	asManager := NewAppStateManagerImp(log)
-	asManager.Start(app_state.INITIALIZING)
-	if asManager.GetCurrentState() != app_state.OPERRABLE {
+	asManager.Start(app_state.INITIALIZED)
+	if asManager.GetCurrentState() != app_state.ENABLED {
 		t.Error("Incorrect target state")
 	}
 }
 
 func TestAppStateManagerImpRegisterClientAndBlockState(t *testing.T) {
-	log := logger.NewLoggerImp()
+	log := logger.NewLoggerImp(nil)
 	log.Disable()
 	asManager := NewAppStateManagerImp(log)
 	smClient := &AppStateTestClient{asManager, "ClientA", logger.NewLogWrapper(log, "TC")}
 	smClient.RegisterClient()
-	smClient.LockState(app_state.LOADING)
+	smClient.LockState(app_state.LOADED)
 
-	asManager.Start(app_state.INITIALIZING)
+	asManager.Start(app_state.INITIALIZED)
 
 	//check if SM stop on blocked state
-	if asManager.GetCurrentState() != app_state.LOADING {
+	if asManager.GetCurrentState() != app_state.LOADED {
 		t.Error("Incorrect blocked state")
 	}
 
 	smClient.UnlockState()
 
 	//check if SM go further after state unlock
-	if asManager.GetCurrentState() != app_state.OPERRABLE {
+	fmt.Println(asManager.GetCurrentState().ToString())
+	if asManager.GetCurrentState() != app_state.ENABLED {
 		t.Error("Incorrect target state")
 	}
 }
 
 func TestAppStateManagerImpTwoClientsBlockStates(t *testing.T) {
-	log := logger.NewLoggerImp()
+	log := logger.NewLoggerImp(nil)
 	log.Disable()
 	asManager := NewAppStateManagerImp(log)
 	smClientA := &AppStateTestClient{asManager, "ClientA", logger.NewLogWrapper(log, "TC1")}
@@ -79,21 +81,21 @@ func TestAppStateManagerImpTwoClientsBlockStates(t *testing.T) {
 	smClientA.RegisterClient()
 	smClientB.RegisterClient()
 
-	smClientA.LockState(app_state.LOADING)
+	smClientA.LockState(app_state.LOADED)
 	smClientA.LockState(app_state.CONFIGURED)
-	smClientB.LockState(app_state.LOADING)
+	smClientB.LockState(app_state.LOADED)
 
-	asManager.Start(app_state.INITIALIZING)
+	asManager.Start(app_state.INITIALIZED)
 
 	//check if SM stop on first blocked state
-	if asManager.GetCurrentState() != app_state.LOADING {
+	if asManager.GetCurrentState() != app_state.LOADED {
 		t.Error("Incorrect blocked state")
 	}
 
 	smClientA.UnlockState()
 
 	//check if SM still blocks state due to second client
-	if asManager.GetCurrentState() != app_state.LOADING {
+	if asManager.GetCurrentState() != app_state.LOADED {
 		t.Error("Incorrect blocked state")
 	}
 
@@ -107,7 +109,7 @@ func TestAppStateManagerImpTwoClientsBlockStates(t *testing.T) {
 	smClientA.UnlockState()
 
 	//check if SM went to final state
-	if asManager.GetCurrentState() != app_state.OPERRABLE {
+	if asManager.GetCurrentState() != app_state.ENABLED {
 		t.Error("Incorrect blocked state")
 	}
 }
