@@ -12,22 +12,20 @@ import (
 )
 
 type TcpServer struct {
-	closeServerChan  chan bool
-	closedServerChan chan bool
-	dataStreamChan   chan<- string
-	log              logger.LogWrapper
-	asm              app_state_manager.AppStateClientHandler
-	conn             net.Conn     //handler to close connection
-	listener         net.Listener //handler to close connection
+	closeSignalChan chan struct{}
+	dataStreamChan  chan<- string
+	log             logger.LogWrapper
+	asm             app_state_manager.AppStateClientHandler
+	conn            net.Conn     //handler to close connection
+	listener        net.Listener //handler to close connection
 }
 
 func NewTcpServer(logg logger.Logger, asmClient app_state_manager.AppStateClientHandler, dataStreamChannel chan<- string) *TcpServer {
 	tcpServ := &TcpServer{
-		closeServerChan:  make(chan bool, 1),
-		closedServerChan: make(chan bool, 1),
-		log:              *logger.NewLogWrapper(logg, "TCPS"),
-		asm:              asmClient,
-		dataStreamChan:   dataStreamChannel,
+		closeSignalChan: make(chan struct{}),
+		log:             *logger.NewLogWrapper(logg, "TCPS"),
+		asm:             asmClient,
+		dataStreamChan:  dataStreamChannel,
 	}
 	asmClient.RegisterObserver(tcpServ)
 	return tcpServ
@@ -42,8 +40,8 @@ func (tcpServ *TcpServer) OnAppStateChanged(state app_state.State) {
 		tcpServ.RunTcpServer()
 	case app_state.SHUTDOWN:
 		tcpServ.log.Log(logger.DEBUG, "SHUTDOWN received")
-		tcpServ.closeServerChan <- true
-		<-tcpServ.closedServerChan
+		tcpServ.closeSignalChan <- struct{}{}
+		<-tcpServ.closeSignalChan
 		tcpServ.asm.UnlockState(tcpServ)
 	case app_state.DISABLED:
 	}
@@ -94,14 +92,14 @@ func (tcpServ *TcpServer) RunTcpServer() {
 	}
 
 	observeCloseChannel := func() {
-		<-tcpServ.closeServerChan
+		<-tcpServ.closeSignalChan
 		tcpServ.log.Log(logger.INFO, "Stopping tcps server")
 		if tcpServ.conn != nil {
 			tcpServ.log.Log(logger.INFO, "Closing connection")
 			tcpServ.conn.Close()
 		}
 		tcpServ.listener.Close()
-		tcpServ.closedServerChan <- true
+		tcpServ.closeSignalChan <- struct{}{}
 	}
 
 	go observeCloseChannel()

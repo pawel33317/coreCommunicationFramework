@@ -10,6 +10,9 @@ import (
 	"github.com/pawel33317/coreCommunicationFramework/tcp_server"
 )
 
+// func main() { mainthread.Init(defferedMain) } //allows to calls methods on main thread
+// considere in the future
+
 func main() {
 
 	//DB
@@ -30,7 +33,7 @@ func main() {
 
 	appStateManager := app_state_manager.NewAppStateManagerImp(loggerImp)
 
-	termSignalChan := make(chan bool)
+	termSignalChan := make(chan struct{})
 	sys_signal_listener.ListenOnTerminationSignal(termSignalChan)
 
 	http_log_server.NewHttpLogServer(loggerImp, db, appStateManager)
@@ -41,17 +44,13 @@ func main() {
 	appStateManager.Start(app_state.INITIALIZED)
 
 	for {
-		quit := false
 		select {
 		case termSignal := <-termSignalChan:
 			log.Log(logger.WARN, "Term signal received, exiting", termSignal)
 			appStateManager.RequestStateChange(app_state.SHUTDOWN)
-			quit = true
+			return
 		case tcpData := <-tcpDataChan:
 			log.Log(logger.INFO, "Main thread received TCP data:", tcpData)
-		}
-		if quit {
-			break
 		}
 	}
 }

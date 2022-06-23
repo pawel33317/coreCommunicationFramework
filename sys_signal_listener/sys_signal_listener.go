@@ -6,7 +6,7 @@ import (
 	"syscall"
 )
 
-func ListenOnTerminationSignal(receivedChannel chan<- bool) {
+func ListenOnTerminationSignal(receivedSignalChan chan<- struct{}) {
 	sigs := make(chan os.Signal, 1)
 	signal.Notify(sigs, syscall.SIGINT, syscall.SIGTERM)
 
@@ -15,7 +15,7 @@ func ListenOnTerminationSignal(receivedChannel chan<- bool) {
 			sig := <-sigs
 
 			if sig == syscall.SIGINT || sig == syscall.SIGTERM {
-				receivedChannel <- true
+				receivedSignalChan <- struct{}{}
 			}
 		}
 	}()
