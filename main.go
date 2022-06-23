@@ -7,7 +7,7 @@ import (
 	"github.com/pawel33317/coreCommunicationFramework/http_log_server"
 	"github.com/pawel33317/coreCommunicationFramework/logger"
 	"github.com/pawel33317/coreCommunicationFramework/sys_signal_listener"
-	"github.com/pawel33317/coreCommunicationFramework/test_objects"
+	"github.com/pawel33317/coreCommunicationFramework/tcp_server"
 )
 
 func main() {
@@ -35,14 +35,23 @@ func main() {
 
 	http_log_server.NewHttpLogServer(loggerImp, db, appStateManager)
 
-	test_objects.Print_data_time_parallely(loggerImp)
+	tcpDataChan := make(chan string)
+	tcp_server.NewTcpServer(loggerImp, appStateManager, tcpDataChan)
 
 	appStateManager.Start(app_state.INITIALIZED)
 
-	select {
-	case termSignal := <-termSignalChan:
-		log.Log(logger.WARN, "Term signal received, exiting", termSignal)
-		appStateManager.RequestStateChange(app_state.SHUTDOWN)
-		break
+	for {
+		quit := false
+		select {
+		case termSignal := <-termSignalChan:
+			log.Log(logger.WARN, "Term signal received, exiting", termSignal)
+			appStateManager.RequestStateChange(app_state.SHUTDOWN)
+			quit = true
+		case tcpData := <-tcpDataChan:
+			log.Log(logger.INFO, "Main thread received TCP data:", tcpData)
+		}
+		if quit {
+			break
+		}
 	}
 }

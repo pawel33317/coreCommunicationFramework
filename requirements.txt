@@ -1,0 +1,35 @@
+1. Pozwala na stworzenie wątku odbieranie stanu, progresui komunikację.
+2. Daje możliwość zrobienia timera
+3. Umożliwia stworzenie wątku thriftowego
+4. Umożliwia stworzneie wątku DBUS
+5. Umożliwia stworzenie wątku unix
+6. Ma maszynę stanów informującą wszystkie wątki
+7. Posiada logger (do sql)
+8. Posiada serwer http - pokazuje logi, statsy
+9. Posiada parser parametrów konsoli
+10. UT
+11. CT
+12. Może add jakiś console reader do sterowania
+
+
+1. Każdy nowy job musi implementować Interfejs IState
+	iState musi mieś metody: onStateChanged, addBlockingState, 
+	
+	
+	
+export GOROOT=/usr/local/go
+export GOPATH=/mnt/d/repo/goApps
+export PATH=$GOPATH/bin:$GOROOT/bin:$PATH
+
+
+pliki pobierane np:
+ go get -u github.com/go-sql-driver/mysql
+ 
+znajdują się w 
+
+/mnt/d/repo/goApps/pkg/mod/cache/download/github.com/go-sql-driver
+/mnt/d/repo/goApps/pkg/mod/cache/download/sumdb/sum.golang.org/lookup/github.com/go-sql-driver
+/mnt/d/repo/goApps/pkg/mod/github.com/go-sql-driver
+
+go mod download
+go mod tidy - aktualizuje requirementy

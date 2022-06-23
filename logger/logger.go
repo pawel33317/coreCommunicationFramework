@@ -3,6 +3,7 @@ package logger
 import (
 	"fmt"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/pawel33317/coreCommunicationFramework/db_handler"
@@ -87,6 +88,7 @@ type LoggerImp struct {
 	isEnabled   bool
 	minLogLevel LogLevel
 	dbHandler   db_handler.DbLogger
+	mu          sync.Mutex
 }
 
 //LoggerImp constructor
@@ -113,6 +115,7 @@ func (loggerImp *LoggerImp) Log(level LogLevel, ctx string, i ...interface{}) {
 	if !loggerImp.isEnabled || loggerImp.minLogLevel > level {
 		return
 	}
+	loggerImp.mu.Lock()
 	fmt.Print("[", ctx, "]")
 	iter := 4 - len(ctx)
 	for iter > 0 {
@@ -124,7 +127,7 @@ func (loggerImp *LoggerImp) Log(level LogLevel, ctx string, i ...interface{}) {
 		fmt.Print(" ", v)
 	}
 	fmt.Println()
-
+	loggerImp.mu.Unlock()
 	if loggerImp.dbHandler != nil {
 		loggerImp.logToDB(level, ctx, i...)
 	}

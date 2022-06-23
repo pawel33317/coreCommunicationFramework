@@ -47,7 +47,7 @@ func NewAppStateManagerImp(smLogger logger.Logger) *AppStateManagerImp {
 
 //private
 func (asmData *AppStateManagerImp) informObservers() {
-	if asmData.informingObserversInProgress == true {
+	if asmData.informingObserversInProgress {
 		return
 	}
 	asmData.informingObserversInProgress = true //client may synchronically call UnlockState there is a need to ensure that all clients will be informed about all states
@@ -64,7 +64,7 @@ func (asmData *AppStateManagerImp) isCurrencStateBlocked() bool {
 
 //private
 func (asmData *AppStateManagerImp) nextState() {
-	if asmData.informingObserversInProgress == true {
+	if asmData.informingObserversInProgress {
 		asmData.logger.Log(logger.INFO, "Skipping nextState() due to informing observers")
 		return
 	}

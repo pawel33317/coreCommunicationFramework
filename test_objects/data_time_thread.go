@@ -9,7 +9,7 @@ import (
 func Print_data_time_parallely(l logger.Logger) {
 	go func() {
 		for {
-			time.Sleep(5 * time.Second)
+			time.Sleep(10 * time.Second)
 			l.Log(logger.INFO, "DATE", "Current date and time is: ", time.Now().String())
 		}
 	}()

@@ -15,12 +15,12 @@ import (
 )
 
 type HttpLogServer struct {
-	closeServerChan chan bool
+	closeServerChan  chan bool
 	closedServerChan chan bool
-	log             logger.LogWrapper
-	srv             *http.Server
-	logReader       db_handler.DbLogReader
-	asm             app_state_manager.AppStateClientHandler
+	log              logger.LogWrapper
+	srv              *http.Server
+	logReader        db_handler.DbLogReader
+	asm              app_state_manager.AppStateClientHandler
 }
 
 func NewHttpLogServer(logg logger.Logger, logsReader db_handler.DbLogReader, asmClient app_state_manager.AppStateClientHandler) *HttpLogServer {
@@ -46,6 +46,8 @@ func (h *HttpLogServer) OnAppStateChanged(state app_state.State) {
 		h.closeServerChan <- true
 		<-h.closedServerChan
 		h.asm.UnlockState(h)
+	case app_state.DISABLED:
+		h.log.Log(logger.INFO, "DISABLED received")
 	}
 }
 
@@ -95,7 +97,7 @@ func (hls *HttpLogServer) RunLogServer() {
 		<-hls.closeServerChan
 		hls.log.Log(logger.INFO, "Stopping hls server")
 		hls.srv.Shutdown(context.TODO())
-		hls.closedServerChan<-true
+		hls.closedServerChan <- true
 	}()
 
 }
