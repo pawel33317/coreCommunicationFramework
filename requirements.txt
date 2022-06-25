@@ -12,18 +12,12 @@
 12. Może add jakiś console reader do sterowania
 
 
-1. Każdy nowy job musi implementować Interfejs IState
-	iState musi mieś metody: onStateChanged, addBlockingState, 
-	
-	
-	
 export GOROOT=/usr/local/go
 export GOPATH=/mnt/d/repo/goApps
 export PATH=$GOPATH/bin:$GOROOT/bin:$PATH
 
-
 pliki pobierane np:
- go get -u github.com/go-sql-driver/mysql
+go get -u github.com/go-sql-driver/mysql
  
 znajdują się w 
 

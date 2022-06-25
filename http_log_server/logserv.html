@@ -17,7 +17,71 @@
 	tr:nth-child(even) {
 		background-color: #dddddd;
 	}
+
+	.highlightYellow {
+		background-color: yellow;
+	}
+	.highlightOrange {
+		background-color: orange;
+	}
 </style>
+<script>
+
+var lastLogId = 0;
+function httpGetAsync(theUrl, callback)
+{
+    var xmlHttp = new XMLHttpRequest();
+    xmlHttp.onreadystatechange = function() { 
+        if (xmlHttp.readyState == 4 && xmlHttp.status == 200)
+            callback(xmlHttp.responseText);
+    }
+    xmlHttp.open("GET", theUrl, true);
+    xmlHttp.send(null);
+}
+
+function received(json){
+	const arr = JSON.parse(json);
+
+	if (arr.length > 0){
+		lastLogId = arr[0]["LogId"];
+		var elems = document.querySelectorAll(".highlightOrange");
+
+		[].forEach.call(elems, function(el) {
+			el.classList.remove("highlightOrange");
+			el.classList.add("highlightYellow");
+		});
+	}
+
+	iter = 0;
+	arr.forEach((element) => {
+		
+		table = document.getElementsByTagName("table")[0];
+		var row = table.insertRow(1+iter);
+		var LogId = row.insertCell(0);
+		var LogTime = row.insertCell(1);
+		var LogLevel = row.insertCell(2);
+		var LogCtx = row.insertCell(3);
+		var LogMsg = row.insertCell(4);
+
+		LogId.innerHTML = element["LogId"];
+		LogTime.innerHTML = element["LogTime"];
+		LogLevel.innerHTML = element["LogLevel"];
+		LogCtx.innerHTML = element["LogCtx"];
+		LogMsg.innerHTML = element["LogMsg"];
+
+		LogId.classList.add('highlightOrange')
+		iter++
+	});
+	alert("new logs " + arr.length)  
+}
+
+setInterval(function(){
+	if (lastLogId == 0) {
+		lastLogId = document.getElementsByTagName("table")[0].rows[1].getElementsByTagName("td")[0].innerHTML;
+	}
+	httpGetAsync("http://localhost:2001/getNewLogs?lastLogId="+lastLogId, received)
+}, 5000);
+</script>
 <title>{{.PageTitle}}</title>
 </head>
 <body>

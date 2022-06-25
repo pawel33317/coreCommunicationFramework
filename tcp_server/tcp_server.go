@@ -48,7 +48,7 @@ func (tcpServ *TcpServer) OnAppStateChanged(state app_state.State) {
 }
 
 func (tcpServ *TcpServer) RunTcpServer() {
-	PORT := "127.0.0.1:8081"
+	PORT := "127.0.0.1:3001"
 	tcpServ.log.Log(logger.INFO, "Starting tcps server", PORT)
 
 	startConnectionReader := func() {

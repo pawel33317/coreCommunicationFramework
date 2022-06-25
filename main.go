@@ -1,6 +1,8 @@
 package main
 
 import (
+	"time"
+
 	"github.com/pawel33317/coreCommunicationFramework/app_state_manager"
 	"github.com/pawel33317/coreCommunicationFramework/app_state_manager/app_state"
 	"github.com/pawel33317/coreCommunicationFramework/db_handler"
@@ -43,6 +45,9 @@ func main() {
 
 	appStateManager.Start(app_state.INITIALIZED)
 
+	timer1 := time.NewTimer(12 * time.Second)
+	ticker1 := time.NewTicker(15 * time.Second)
+
 	for {
 		select {
 		case termSignal := <-termSignalChan:
@@ -51,6 +56,10 @@ func main() {
 			return
 		case tcpData := <-tcpDataChan:
 			log.Log(logger.INFO, "Main thread received TCP data:", tcpData)
+		case <-timer1.C:
+			log.Log(logger.INFO, "Timer executed")
+		case <-ticker1.C:
+			log.Log(logger.INFO, "Ticker executed")
 		}
 	}
 }
