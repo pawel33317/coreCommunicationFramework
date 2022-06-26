@@ -92,8 +92,6 @@ func (sqlDb *SQLiteDb) Log(time int64, level int, ctx string, msg string) {
 	if err != nil {
 		panic(err)
 	}
-
-	//TODO: remove records if more than 100
 }
 
 //Starts connection to SQLite and create logs table if not exists
