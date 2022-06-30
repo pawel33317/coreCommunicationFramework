@@ -1,0 +1,18 @@
+ Create ~/.bash_sysinit
+
+In the script shown below, you must replace <your_ubuntu_wsl2_password> with your own password that you set for Ubuntu/WSL2. If you're uncomfortable adding your password in the script, you can remove the line and enter your 
+password directly while running the script; since you only need to enter your password once when you open an Ubuntu/WSL2 console for the first time, it shouldn't be too annoying...
+
+
+ Add the following to your ~/.profile for loading ~/.bash_sysinit
+
+
+if [ -f ~/.bash_sysinit ]; then
+    . ~/.bash_sysinit
+fi
+
+ Try opening a new Ubuntu/WSL2 console
+
+Whenever a new Ubuntu console is opened, you should be able to confirm that DBUS_SESSION_BUS_ADDRESS environment variable is always pointing to the same Unix socket in your /run/user/$(id -u) directory.
+
+Ja używam .bashrc

@@ -6,6 +6,7 @@ import (
 	"github.com/pawel33317/coreCommunicationFramework/app_state_manager"
 	"github.com/pawel33317/coreCommunicationFramework/app_state_manager/app_state"
 	"github.com/pawel33317/coreCommunicationFramework/db_handler"
+	"github.com/pawel33317/coreCommunicationFramework/dbus_server"
 	"github.com/pawel33317/coreCommunicationFramework/http_log_server"
 	"github.com/pawel33317/coreCommunicationFramework/logger"
 	"github.com/pawel33317/coreCommunicationFramework/sys_signal_listener"
@@ -42,6 +43,8 @@ func main() {
 
 	tcpDataChan := make(chan string)
 	tcp_server.NewTcpServer(loggerImp, appStateManager, tcpDataChan)
+
+	dbus_server.NewDBUSServer(loggerImp, appStateManager)
 
 	appStateManager.Start(app_state.INITIALIZED)
 

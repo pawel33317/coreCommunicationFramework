@@ -11,6 +11,8 @@ import (
 	"github.com/pawel33317/coreCommunicationFramework/logger"
 )
 
+//use coreCF_test_tcp_client for testing
+
 type TcpServer struct {
 	closeSignalChan chan struct{}
 	dataStreamChan  chan<- string
