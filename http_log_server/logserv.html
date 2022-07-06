@@ -39,7 +39,7 @@
 		const arr = JSON.parse(json);
 
 		if (arr.length > 0){
-			lastLogId = arr[0]["LogId"];
+			lastLogId = arr[0]["ID"];
 			var elems = document.querySelectorAll(".highlightOrange");
 
 			[].forEach.call(elems, function(el) {
@@ -57,11 +57,11 @@
 			var LogLevel = row.insertCell(2);
 			var LogCtx = row.insertCell(3);
 			var LogMsg = row.insertCell(4);
-			LogId.innerHTML = element["LogId"];
-			LogTime.innerHTML = element["LogTime"];
-			LogLevel.innerHTML = element["LogLevel"];
-			LogCtx.innerHTML = element["LogCtx"];
-			LogMsg.innerHTML = element["LogMsg"];
+			LogId.innerHTML = element["ID"];
+			LogTime.innerHTML = element["Time"];
+			LogLevel.innerHTML = element["Level"];
+			LogCtx.innerHTML = element["Ctx"];
+			LogMsg.innerHTML = element["Msg"];
 
 			LogId.classList.add('highlightOrange')
 			iter++
@@ -92,11 +92,11 @@
 
 		{{range .LogsData}}
 		<tr>
-			<td>{{.LogId}}</td>
-			<td>{{.LogTime}}</th>
-			<td>{{.LogLevel}}</th>
-			<td>{{.LogCtx}}</th>
-			<td>{{.LogMsg}}</th>
+			<td>{{.ID}}</td>
+			<td>{{.Time}}</th>
+			<td>{{.Level}}</th>
+			<td>{{.Ctx}}</th>
+			<td>{{.Msg}}</th>
 		</tr>
 		{{end}}
 

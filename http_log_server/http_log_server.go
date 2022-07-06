@@ -55,17 +55,17 @@ func (h *HttpLogServer) OnAppStateChanged(state app_state.State) {
 	}
 }
 
-func parseLogs(logs []db_handler.LogDataFormat) {
+func parseLogs(logs []db_handler.Log) {
 	for k, elem := range logs {
-		levelVal, err := strconv.Atoi(elem.LogLevel)
+		levelVal, err := strconv.Atoi(elem.Level)
 		if err == nil {
-			logs[k].LogLevel = logger.LogLevel(levelVal).ToString()
+			logs[k].Level = logger.LogLevel(levelVal).ToString()
 		}
 
-		timeInt, err := strconv.ParseInt(elem.LogTime, 10, 64)
+		timeInt, err := strconv.ParseInt(elem.Time, 10, 64)
 		if err == nil {
 			unixTimeUTC := time.Unix(timeInt, 0)
-			logs[k].LogTime = unixTimeUTC.Format("2006-01-02 15:04:05")
+			logs[k].Time = unixTimeUTC.Format("2006-01-02 15:04:05")
 		}
 	}
 }
@@ -75,7 +75,7 @@ func (h *HttpLogServer) mainHandler(w http.ResponseWriter, r *http.Request) {
 
 	type LogPageData struct {
 		PageTitle string
-		LogsData  []db_handler.LogDataFormat
+		LogsData  []db_handler.Log
 	}
 
 	logs := h.logReader.GetLogs()
@@ -89,7 +89,7 @@ func (h *HttpLogServer) mainHandler(w http.ResponseWriter, r *http.Request) {
 	tmpl.Execute(w, data)
 }
 
-func logsToJson(logs []db_handler.LogDataFormat) string {
+func logsToJson(logs []db_handler.Log) string {
 	parseLogs(logs)
 	jsonLogs, err := json.Marshal(logs)
 

@@ -2,6 +2,7 @@ package logger
 
 import (
 	"fmt"
+	"strconv"
 	"strings"
 	"sync"
 	"time"
@@ -107,7 +108,10 @@ func (loggerImp *LoggerImp) logToDB(level LogLevel, ctx string, i ...interface{}
 		slice = append(slice, fmt.Sprint(v))
 	}
 
-	loggerImp.dbHandler.Log(time.Now().Unix(), int(level), ctx, strings.Join(slice, " "))
+	// loggerImp.dbHandler.Log(time.Now().Unix(), int(level), ctx, strings.Join(slice, " "))
+
+	//SQL handking via struct reflection :)
+	loggerImp.dbHandler.LogData(&db_handler.Log{"0", strconv.FormatInt(time.Now().Unix(), 10), strconv.Itoa(int(level)), ctx, strings.Join(slice, " ")})
 }
 
 //Logger interface log method implementation

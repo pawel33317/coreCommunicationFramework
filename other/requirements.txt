@@ -27,3 +27,7 @@ znajdują się w
 
 go mod download
 go mod tidy - aktualizuje requirementy
+
+
+//Zrobić jakiś common object dla wszystkoch serwerów, który trzyma logger itp
+//Zrobić mutexy/one thread, żeby była pewność, że wykona się w kolejności

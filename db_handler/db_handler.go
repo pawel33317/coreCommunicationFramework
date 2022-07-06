@@ -9,32 +9,33 @@ import (
 const (
 	DB_FILENAME           = "logs.db"
 	DB_LOG_CREATE_COMMAND = `
-		CREATE TABLE IF NOT EXISTS logs (
+		CREATE TABLE IF NOT EXISTS log (
 		id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
 		time INTEGER NOT NULL,
 		level INTEGER NOT NULL,
 		ctx TEXT,
-		log TEXT
+		msg TEXT
 	);`
 )
 
 //Allows to store logs in DB
 type DbLogger interface {
 	Log(int64, int, string, string)
+	LogData(*Log)
 }
 
 //Allows to read logs from DB
 type DbLogReader interface {
-	GetLogs() []LogDataFormat
-	GetLogsNewerThan(int) []LogDataFormat
+	GetLogs() []Log
+	GetLogsNewerThan(int) []Log
 }
 
-type LogDataFormat struct {
-	LogId    string
-	LogTime  string
-	LogLevel string
-	LogCtx   string
-	LogMsg   string
+type Log struct {
+	ID    string
+	Time  string
+	Level string
+	Ctx   string
+	Msg   string
 }
 
 //SQLite handler implementation
@@ -42,18 +43,18 @@ type SQLiteDb struct {
 	dbHandler *sql.DB
 }
 
-func (sqlDb *SQLiteDb) GetLogsNewerThan(lastLogId int) []LogDataFormat {
-	rows, err := sqlDb.dbHandler.Query("SELECT * FROM logs WHERE ID > ? ORDER BY id DESC", lastLogId)
+func (sqlDb *SQLiteDb) GetLogsNewerThan(lastLogId int) []Log {
+	rows, err := sqlDb.dbHandler.Query("SELECT * FROM log WHERE ID > ? ORDER BY id DESC", lastLogId)
 	if err != nil {
 		panic(err)
 	}
 	defer rows.Close()
 
-	data := []LogDataFormat{}
+	data := []Log{}
 
 	for rows.Next() {
-		i := LogDataFormat{}
-		err = rows.Scan(&i.LogId, &i.LogTime, &i.LogLevel, &i.LogCtx, &i.LogMsg)
+		i := Log{}
+		err = rows.Scan(&i.ID, &i.Time, &i.Level, &i.Ctx, &i.Msg)
 		if err != nil {
 			panic(err)
 		}
@@ -62,28 +63,45 @@ func (sqlDb *SQLiteDb) GetLogsNewerThan(lastLogId int) []LogDataFormat {
 	return data
 }
 
-func (sqlDb *SQLiteDb) GetLogs() []LogDataFormat {
-	rows, err := sqlDb.dbHandler.Query("SELECT * FROM logs ORDER BY id DESC LIMIT 500")
+func (sqlDb *SQLiteDb) GetLogs() []Log {
+	rows, err := sqlDb.dbHandler.Query("SELECT * FROM log ORDER BY id DESC LIMIT 500")
 	if err != nil {
 		panic(err)
 	}
 	defer rows.Close()
 
-	data := []LogDataFormat{}
+	data := []Log{}
 
 	for rows.Next() {
-		i := LogDataFormat{}
-		err = rows.Scan(&i.LogId, &i.LogTime, &i.LogLevel, &i.LogCtx, &i.LogMsg)
+		i := Log{}
+		err = rows.Scan(&i.ID, &i.Time, &i.Level, &i.Ctx, &i.Msg)
 		if err != nil {
 			panic(err)
 		}
 		data = append(data, i)
 	}
 	return data
+}
+
+func (sqlDb *SQLiteDb) LogData(log *Log) {
+	query, err := CreateInsertQuery(*log)
+	if err != nil {
+		panic(err)
+	}
+
+	stmt, err := sqlDb.dbHandler.Prepare(*query)
+	if err != nil {
+		panic(err)
+	}
+
+	_, err = stmt.Exec()
+	if err != nil {
+		panic(err)
+	}
 }
 
 func (sqlDb *SQLiteDb) Log(time int64, level int, ctx string, msg string) {
-	stmt, err := sqlDb.dbHandler.Prepare("INSERT INTO logs(time, level, ctx, log) values(?,?,?,?)")
+	stmt, err := sqlDb.dbHandler.Prepare("INSERT INTO log(time, level, ctx, msg) values(?,?,?,?)")
 	if err != nil {
 		panic(err)
 	}
@@ -94,7 +112,7 @@ func (sqlDb *SQLiteDb) Log(time int64, level int, ctx string, msg string) {
 	}
 }
 
-//Starts connection to SQLite and create logs table if not exists
+//Starts connection to SQLite and create log table if not exists
 func (sqlDb *SQLiteDb) Open() error {
 	db, err := sql.Open("sqlite3", DB_FILENAME)
 	sqlDb.dbHandler = db
